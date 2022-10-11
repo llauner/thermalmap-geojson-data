@@ -41,8 +41,8 @@ jobs:
       - name: Install tippecanoe
         run: |
           cd tippecanoe
-          make -j
-          make install
+          sudo make -j
+          sudo make install
           
           
 
