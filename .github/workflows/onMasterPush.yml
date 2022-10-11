@@ -48,3 +48,11 @@ jobs:
       - name: Run tippecanoe to generate tiles
         run: |
           tippecanoe -r1 -z12 --drop-densest-as-needed --extend-zooms-if-still-dropping  -o thermals.mbtiles thermals.geojson
+     
+      # Push changes to repo    
+      - name: Push changes into repo
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Automated Change
+          file_pattern: '*.mbtiles'
+        
