@@ -47,7 +47,7 @@ jobs:
       # Runs tippecannoe
       - name: Run tippecanoe to generate tiles
         run: |
-          tippecanoe -r1 -z12 --drop-densest-as-needed --extend-zooms-if-still-dropping  -o thermals.mbtiles thermals.geojson
+          tippecanoe -r1 -z12 --progress-interval=15 --drop-densest-as-needed --extend-zooms-if-still-dropping  -o thermals.mbtiles thermals.geojson
      
       # Push changes to repo    
       - name: Push changes into repo
