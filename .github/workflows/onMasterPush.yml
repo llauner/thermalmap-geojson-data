@@ -30,10 +30,10 @@ jobs:
       # While cloning the repository:
       #   - it clones the repo into the given `path`
       #   - it checks out the branch defined at `ref`
-      - name: Clone supercharge docs repository
+      - name: Clone thermalmap-tippecanoe repo
         uses: actions/checkout@v2
         with:
-          repository: thermalmap-tippecanoe
+          repository: llauner/thermalmap-tippecanoe
           path: ./tippecanoe
           ref: master
 
