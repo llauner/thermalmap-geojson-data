@@ -6,9 +6,8 @@ name: CI
 on:
   # Triggers the workflow on push or pull request events but only for the "master" branch
   push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+    paths:
+      - 'thermals.geojson'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -17,6 +16,7 @@ on:
 jobs:
   # This workflow contains a single job called "build"
   build:
+    if: ${{ github.ref == 'refs/heads/master' }}
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
@@ -47,7 +47,7 @@ jobs:
       # Runs tippecannoe
       - name: Run tippecanoe to generate tiles
         run: |
-          tippecanoe -r1 -z12 --progress-interval=20 --drop-densest-as-needed --extend-zooms-if-still-dropping  -o thermals.mbtiles thermals.geojson
+          tippecanoe -r1 -z12 --progress-interval=20 --drop-densest-as-needed --extend-zooms-if-still-dropping  -o thermals.mbtiles thermals.geojson --force
      
       # Push changes to repo    
       - name: Push changes into repo
