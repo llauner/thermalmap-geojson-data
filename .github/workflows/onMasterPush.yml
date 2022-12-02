@@ -18,7 +18,7 @@ env:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  build:
+  build_mbtiles:
     if: ${{ github.ref == 'refs/heads/master' }}
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
@@ -49,7 +49,6 @@ jobs:
           
       # Runs tippecannoe
       - name: Run tippecanoe to generate tiles
-        if: ${{ github.ref == 'refs/heads/xx' }} # HACK: DELETE ME: done for testing
         run: |
           tippecanoe -r1 -z12 --progress-interval=20 --drop-densest-as-needed --extend-zooms-if-still-dropping  -o thermals.mbtiles thermals.geojson --force
      
@@ -108,7 +107,6 @@ jobs:
 
 
   push-event-to-other-repo:
-    if: false
     needs: [build, build_brokjson]
     name: Dispatch to other repo= thermalmap-tilehut-server
     runs-on: ubuntu-latest
