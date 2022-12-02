@@ -49,6 +49,7 @@ jobs:
           
       # Runs tippecannoe
       - name: Run tippecanoe to generate tiles
+        if: ${{ github.ref == 'refs/heads/xx' }} # HACK: DELETE ME: done for testing
         run: |
           tippecanoe -r1 -z12 --progress-interval=20 --drop-densest-as-needed --extend-zooms-if-still-dropping  -o thermals.mbtiles thermals.geojson --force
      
@@ -74,6 +75,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: llauner/thermal_map
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           path: ./thermal_map
           ref: master
 
