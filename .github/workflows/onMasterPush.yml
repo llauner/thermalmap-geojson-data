@@ -60,7 +60,7 @@ jobs:
           file_pattern: '*.mbtiles'
 
   build_brokjson:
-    needs: [build]
+    needs: [build_mbtiles]
     name: Build brokjson file from geojson
     if: ${{ github.ref == 'refs/heads/master' }}
     runs-on: ubuntu-latest
@@ -107,7 +107,7 @@ jobs:
 
 
   push-event-to-other-repo:
-    needs: [build, build_brokjson]
+    needs: [build_mbtiles, build_brokjson]
     name: Dispatch to other repo= thermalmap-tilehut-server
     runs-on: ubuntu-latest
     steps:
