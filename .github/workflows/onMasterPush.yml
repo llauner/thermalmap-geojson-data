@@ -5,9 +5,9 @@ name: Create thermals.mbtiles + thermals.brokjson.zip
 # Controls when the workflow will run
 on:
   # Triggers the workflow on push or pull request events but only for the "master" branch
-  # push:
-  #   paths:
-  #     - 'thermals.geojson'
+  push:
+    paths:
+      - 'thermals.geojson'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -19,7 +19,7 @@ env:
 jobs:
   # This workflow contains a single job called "build"
   build:
-    if: ${{ github.ref == 'refs/heads/main' }}
+    if: ${{ github.ref == 'refs/heads/master' }}
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
@@ -62,7 +62,7 @@ jobs:
   build_brokjson:
     needs: [build]
     name: Build brokjson file from geojson
-    if: ${{ github.ref == 'refs/heads/main' }}
+    if: ${{ github.ref == 'refs/heads/master' }}
     runs-on: ubuntu-latest
 
     steps:
