@@ -12,6 +12,9 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+env:
+  project_id: igcheatmap
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -55,9 +58,56 @@ jobs:
         with:
           commit_message: Automated Change
           file_pattern: '*.mbtiles'
-  
+
+  build_brokjson:
+    needs: [build]
+    name: Build brokjson file from geojson
+    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install Zip
+        run: |
+          sudo apt install zip
+
+      - name: Clone thermal_map
+        uses: actions/checkout@v3
+        with:
+          repository: llauner/thermal_map
+          path: ./thermal_map
+          ref: master
+
+      - name: Clone thermalmap-geojson-data repo
+        uses: actions/checkout@v3
+        with:
+          path: ./thermalmap-geojson-data
+          ref: master
+          
+      - uses: actions/setup-python@v4
+        with:
+            python-version: 3.10
+            
+      - name: Install thermal_map and create thermals.brokjson.zip
+        run: |
+          cd ./thermal_map
+          python -VV
+          pip install -r requirements_main.txt
+          python main_geojson2brokjson.py ../thermalmap-geojson-data/thermals.geojson ../thermalmap-geojson-data/thermals.brokjson
+          zip ../thermalmap-geojson-data/thermals.brokjson.zip ../thermalmap-geojson-data/thermals.brokjson
+          cd ../thermalmap-geojson-data
+
+      # Push changes to repo    
+      - name: Push changes into repo
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          repository: ./thermalmap-geojson-data
+          commit_message: Automated Change
+          file_pattern: 'thermals.brokjson.zip'
+
+
   push-event-to-other-repo:
-    needs: build
+    if: false
+    needs: [build, build_brokjson]
     name: Dispatch to other repo= thermalmap-tilehut-server
     runs-on: ubuntu-latest
     steps:
