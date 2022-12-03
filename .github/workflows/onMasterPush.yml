@@ -25,6 +25,7 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Clone this repo + thermalmap-tippecanoe repo 
         uses: actions/checkout@v3
@@ -46,11 +47,30 @@ jobs:
           cd tippecanoe
           sudo make -j
           sudo make install
-          
+
+      # List .geojson files
+      - name: List geojson files
+        id: list_files
+        uses: Rishabh510/Path-lister-action@master
+        with:
+          path: "./"
+          type: ".geojson"
+
+      - name: Output results
+        run: |
+          echo "Found ${{ steps.list_files.outputs.path_count }} file(s) with this extension:"
+          for i in ${{ steps.list_files.outputs.paths }}; do
+          echo $i
+          done
+
       # Runs tippecannoe
       - name: Run tippecanoe to generate tiles
         run: |
-          tippecanoe -r1 -z12 --progress-interval=20 --drop-densest-as-needed --extend-zooms-if-still-dropping  -o thermals.mbtiles thermals.geojson --force
+          for f in ${{ steps.list_files.outputs.paths }}; do
+          echo "Converting...: $f"
+          tippecanoe -r1 -z12 --progress-interval=20 --drop-densest-as-needed --extend-zooms-if-still-dropping  -o ${FILE%%.*}.mbtiles f --force
+          
+          #tippecanoe -r1 -z12 --progress-interval=20 --drop-densest-as-needed --extend-zooms-if-still-dropping  -o thermals.mbtiles thermals.geojson --force
      
       # Push changes to repo    
       - name: Push changes into repo
@@ -109,6 +129,7 @@ jobs:
   push-event-to-other-repo:
     needs: [build_mbtiles, build_brokjson]
     name: Dispatch to other repo= thermalmap-tilehut-server
+    if: false
     runs-on: ubuntu-latest
     steps:
       - name: Emit repository_dispatch
