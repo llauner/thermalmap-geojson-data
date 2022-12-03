@@ -17,14 +17,42 @@ env:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
+
+  list-files:
+      runs-on: ubuntu-latest
+      outputs:
+        paths: ${{ steps.list-files.outputs.paths }}
+      steps:
+        - name: List Files
+          id: list-files
+          uses: mirko-felice/list-files-action@v3.0.1
+          with:
+            repo: ${{ github.repository }}
+            ref: ${{ github.ref }}
+            path: "."
+            ext: ".geojson"
+
   # This workflow contains a single job called "build"
   build_mbtiles:
+    needs: list-files
+    strategy:
+      matrix:
+        paths: ${{ fromJson(needs.list-files.outputs.paths) }}
+
     if: ${{ github.ref == 'refs/heads/master' }}
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+      - name: Output results
+        run: |
+          echo ${{ matrix.paths }}
+
+      - name: Output results 2
+        run: |
+          for f in ${{ matrix.paths }};do
+          echo $f
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Clone this repo + thermalmap-tippecanoe repo 
@@ -48,27 +76,12 @@ jobs:
           sudo make -j
           sudo make install
 
-      # List .geojson files
-      - name: List geojson files
-        id: list_files
-        uses: Rishabh510/Path-lister-action@master
-        with:
-          path: "./"
-          type: ".geojson"
-
-      - name: Output results
-        run: |
-          echo "Found ${{ steps.list_files.outputs.path_count }} file(s) with this extension:"
-          for i in ${{ steps.list_files.outputs.paths }}; do
-          echo $i
-          done
-
       # Runs tippecannoe
       - name: Run tippecanoe to generate tiles
         run: |
           for f in ${{ steps.list_files.outputs.paths }}; do
-          echo "Converting...: $f"
-          tippecanoe -r1 -z12 --progress-interval=20 --drop-densest-as-needed --extend-zooms-if-still-dropping  -o ${FILE%%.*}.mbtiles f --force
+          echo "Converting...: ${f}"
+          tippecanoe -r1 -z12 --progress-interval=20 --drop-densest-as-needed --extend-zooms-if-still-dropping  -o ${FILE%%.*}.mbtiles $f --force
           
           #tippecanoe -r1 -z12 --progress-interval=20 --drop-densest-as-needed --extend-zooms-if-still-dropping  -o thermals.mbtiles thermals.geojson --force
      
