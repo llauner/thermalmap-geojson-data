@@ -74,9 +74,11 @@ jobs:
       # Runs tippecannoe
       - name: Run tippecanoe to generate tiles
         run: |
+          CURRENT_FILE=${{ matrix.paths }}
+          CURRENT_FILE_NAME=${CURRENT_FILE%%.*}
           echo "Converting...: ${{ matrix.paths }}"
 
-          tippecanoe -r1 -z12 --progress-interval=20 --drop-densest-as-needed --extend-zooms-if-still-dropping  -o thermals.mbtiles ${{ matrix.paths }} --force
+          tippecanoe -r1 -z12 --progress-interval=20 --drop-densest-as-needed --extend-zooms-if-still-dropping  -o $CURRENT_FILE_NAME.mbtiles ${{ matrix.paths }} --force
     
           #tippecanoe -r1 -z12 --progress-interval=20 --drop-densest-as-needed --extend-zooms-if-still-dropping  -o thermals.mbtiles thermals.geojson --force
      
