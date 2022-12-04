@@ -68,7 +68,7 @@ jobs:
           file_pattern: '*.mbtiles'
 
   build_brokjson:
-    needs: [build_mbtiles]
+    #needs: [build_mbtiles]
 
     name: Build brokjson file from geojson
     if: ${{ github.ref == 'refs/heads/master' }}
