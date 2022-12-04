@@ -89,7 +89,7 @@ jobs:
     strategy:
       matrix:
         paths: ${{ fromJson(needs.list-files.outputs.paths) }}
-        
+
     name: Build brokjson file from geojson
     if: ${{ github.ref == 'refs/heads/master' }}
     runs-on: ubuntu-latest
@@ -118,6 +118,7 @@ jobs:
             python-version: 3.7
 
       - name: Install thermal_map and create thermals.brokjson.zip
+        id: thermal_map
         run: |
           CURRENT_FILE=${{ matrix.paths }}
           CURRENT_FILE_NAME=${CURRENT_FILE%%.*}
@@ -127,6 +128,7 @@ jobs:
           python main_geojson2brokjson.py ../thermalmap-geojson-data/$CURRENT_FILE_NAME.geojson ../thermalmap-geojson-data/$CURRENT_FILE_NAME.brokjson
           zip ../thermalmap-geojson-data/$CURRENT_FILE_NAME.brokjson.zip ../thermalmap-geojson-data/$CURRENT_FILE_NAME.brokjson
           cd ../thermalmap-geojson-data
+          echo "CURRENT_FILE_NAME=$CURRENT_FILE_NAME" >> $GITHUB_OUTPUT
 
       # Push changes to repo    
       - name: Push changes into repo
@@ -134,7 +136,7 @@ jobs:
         with:
           repository: ./thermalmap-geojson-data
           commit_message: Automated Change
-          file_pattern: '$CURRENT_FILE_NAME.brokjson.zip'
+          file_pattern: '${{ steps.thermal_map.outputs.CURRENT_FILE_NAME }}.brokjson.zip'
 
 
   # push-event-to-other-repo:
