@@ -79,16 +79,18 @@ jobs:
           tippecanoe -r1 -z12 --progress-interval=20 --drop-densest-as-needed --extend-zooms-if-still-dropping  -o $CURRENT_FILE_NAME.mbtiles ${{ matrix.paths }} --force
      
       # Push changes to repo
-      - name: Run tippecanoe to generate tiles
+      - name: git pull
         run: git pull    
       - name: Push changes into repo
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Automated Change
+          skip_dirty_check: true
+          push_options: '--force'
           file_pattern: '*.mbtiles'
 
   build_brokjson:
-    needs: [list-files, build_mbtiles]
+    needs: [list-files]
     strategy:
       matrix:
         paths: ${{ fromJson(needs.list-files.outputs.paths) }}
@@ -135,7 +137,7 @@ jobs:
           echo "CURRENT_FILE_NAME=$CURRENT_FILE_NAME" >> $GITHUB_OUTPUT
 
       # Push changes to repo    
-      - name: Run tippecanoe to generate tiles
+      - name: git pull
         run: |
           cd ./thermalmap-geojson-data
           git pull   
@@ -144,6 +146,8 @@ jobs:
         with:
           repository: ./thermalmap-geojson-data
           commit_message: Automated Change
+          skip_dirty_check: true
+          push_options: '--force'
           file_pattern: '${{ steps.thermal_map.outputs.CURRENT_FILE_NAME }}.brokjson.zip'
 
 
