@@ -78,7 +78,9 @@ jobs:
 
           tippecanoe -r1 -z12 --progress-interval=20 --drop-densest-as-needed --extend-zooms-if-still-dropping  -o $CURRENT_FILE_NAME.mbtiles ${{ matrix.paths }} --force
      
-      # Push changes to repo    
+      # Push changes to repo
+      - name: Run tippecanoe to generate tiles
+        run: git pull    
       - name: Push changes into repo
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
@@ -133,6 +135,8 @@ jobs:
           echo "CURRENT_FILE_NAME=$CURRENT_FILE_NAME" >> $GITHUB_OUTPUT
 
       # Push changes to repo    
+      - name: Run tippecanoe to generate tiles
+        run: git pull   
       - name: Push changes into repo
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
