@@ -16,7 +16,8 @@ on:
 jobs:
   # This workflow contains a single job called "build"
   build_mbtiles:
-    if: ${{ github.ref == 'refs/heads/master' }}
+    if: false
+    # if: ${{ github.ref == 'refs/heads/master' }}
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
@@ -99,16 +100,15 @@ jobs:
       - name: Install thermal_map and create thermals.brokjson.zip
         id: thermal_map
         run: |
-          for fileName in $(ls ./thermalmap-geojson-data/*.geojson); do
+          cd ./thermal_map
+          for fileName in $(ls ../thermalmap-geojson-data/*.geojson); do
             CURRENT_FILE=$fileName
             CURRENT_FILE_NAME=$(basename -- "$CURRENT_FILE")
             CURRENT_FILE_NAME="${CURRENT_FILE_NAME%.*}"
-            cd ./thermal_map
             python -VV
             pip install -r requirements_main.txt
             python main_geojson2brokjson.py ../thermalmap-geojson-data/$CURRENT_FILE_NAME.geojson ../thermalmap-geojson-data/$CURRENT_FILE_NAME.brokjson
             zip ../thermalmap-geojson-data/$CURRENT_FILE_NAME.brokjson.zip ../thermalmap-geojson-data/$CURRENT_FILE_NAME.brokjson
-            cd ../thermalmap-geojson-data
           done
 
       # Push changes to repo    
