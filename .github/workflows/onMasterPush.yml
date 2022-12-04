@@ -85,7 +85,11 @@ jobs:
           file_pattern: '*.mbtiles'
 
   build_brokjson:
-    needs: [build_mbtiles]
+    needs: [list-files, build_mbtiles]
+    strategy:
+      matrix:
+        paths: ${{ fromJson(needs.list-files.outputs.paths) }}
+        
     name: Build brokjson file from geojson
     if: ${{ github.ref == 'refs/heads/master' }}
     runs-on: ubuntu-latest
