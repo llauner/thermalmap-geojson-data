@@ -7,13 +7,10 @@ on:
   # Triggers the workflow on push or pull request events but only for the "master" branch
   push:
     paths:
-      - 'thermals.geojson'
+      - '*.geojson'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-
-env:
-  project_id: igcheatmap
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -79,61 +76,61 @@ jobs:
           echo "Converting...: ${{ matrix.paths }}"
 
           tippecanoe -r1 -z12 --progress-interval=20 --drop-densest-as-needed --extend-zooms-if-still-dropping  -o $CURRENT_FILE_NAME.mbtiles ${{ matrix.paths }} --force
-    
-          #tippecanoe -r1 -z12 --progress-interval=20 --drop-densest-as-needed --extend-zooms-if-still-dropping  -o thermals.mbtiles thermals.geojson --force
      
-  #     # Push changes to repo    
-  #     - name: Push changes into repo
-  #       uses: stefanzweifel/git-auto-commit-action@v4
-  #       with:
-  #         commit_message: Automated Change
-  #         file_pattern: '*.mbtiles'
+      # Push changes to repo    
+      - name: Push changes into repo
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Automated Change
+          file_pattern: '*.mbtiles'
 
-  # build_brokjson:
-  #   needs: [build_mbtiles]
-  #   name: Build brokjson file from geojson
-  #   if: ${{ github.ref == 'refs/heads/master' }}
-  #   runs-on: ubuntu-latest
+  build_brokjson:
+    needs: [build_mbtiles]
+    name: Build brokjson file from geojson
+    if: ${{ github.ref == 'refs/heads/master' }}
+    runs-on: ubuntu-latest
 
-  #   steps:
-  #     - name: Install Zip
-  #       run: |
-  #         sudo apt install zip
+    steps:
+      - name: Install Zip
+        run: |
+          sudo apt install zip
 
-  #     - name: Clone thermal_map
-  #       uses: actions/checkout@v3
-  #       with:
-  #         repository: llauner/thermal_map
-  #         token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-  #         path: ./thermal_map
-  #         ref: master
+      - name: Clone thermal_map
+        uses: actions/checkout@v3
+        with:
+          repository: llauner/thermal_map
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          path: ./thermal_map
+          ref: master
 
-  #     - name: Clone thermalmap-geojson-data repo
-  #       uses: actions/checkout@v3
-  #       with:
-  #         path: ./thermalmap-geojson-data
-  #         ref: master
+      - name: Clone thermalmap-geojson-data repo
+        uses: actions/checkout@v3
+        with:
+          path: ./thermalmap-geojson-data
+          ref: master
           
-  #     - uses: actions/setup-python@v4
-  #       with:
-  #           python-version: 3.7
+      - uses: actions/setup-python@v4
+        with:
+            python-version: 3.7
 
-  #     - name: Install thermal_map and create thermals.brokjson.zip
-  #       run: |
-  #         cd ./thermal_map
-  #         python -VV
-  #         pip install -r requirements_main.txt
-  #         python main_geojson2brokjson.py ../thermalmap-geojson-data/thermals.geojson ../thermalmap-geojson-data/thermals.brokjson
-  #         zip ../thermalmap-geojson-data/thermals.brokjson.zip ../thermalmap-geojson-data/thermals.brokjson
-  #         cd ../thermalmap-geojson-data
+      - name: Install thermal_map and create thermals.brokjson.zip
+        run: |
+          CURRENT_FILE=${{ matrix.paths }}
+          CURRENT_FILE_NAME=${CURRENT_FILE%%.*}
+          cd ./thermal_map
+          python -VV
+          pip install -r requirements_main.txt
+          python main_geojson2brokjson.py ../thermalmap-geojson-data/$CURRENT_FILE_NAME.geojson ../thermalmap-geojson-data/$CURRENT_FILE_NAME.brokjson
+          zip ../thermalmap-geojson-data/$CURRENT_FILE_NAME.brokjson.zip ../thermalmap-geojson-data/$CURRENT_FILE_NAME.brokjson
+          cd ../thermalmap-geojson-data
 
-  #     # Push changes to repo    
-  #     - name: Push changes into repo
-  #       uses: stefanzweifel/git-auto-commit-action@v4
-  #       with:
-  #         repository: ./thermalmap-geojson-data
-  #         commit_message: Automated Change
-  #         file_pattern: 'thermals.brokjson.zip'
+      # Push changes to repo    
+      - name: Push changes into repo
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          repository: ./thermalmap-geojson-data
+          commit_message: Automated Change
+          file_pattern: '$CURRENT_FILE_NAME.brokjson.zip'
 
 
   # push-event-to-other-repo:
