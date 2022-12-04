@@ -47,7 +47,7 @@ jobs:
           echo ${{ matrix.paths }}
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Clone this repo + thermalmap-tippecanoe repo 
+      - name: Clone this repo=thermalmap-geojson-data + thermalmap-tippecanoe repo 
         uses: actions/checkout@v3
       
       # This part here is cloning a second repository
@@ -136,7 +136,9 @@ jobs:
 
       # Push changes to repo    
       - name: Run tippecanoe to generate tiles
-        run: git pull   
+        run: |
+          cd ./thermalmap-geojson-data
+          git pull   
       - name: Push changes into repo
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
