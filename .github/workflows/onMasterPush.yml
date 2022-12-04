@@ -72,8 +72,8 @@ jobs:
       - name: Run tippecanoe to generate tiles
         run: |
           CURRENT_FILE=${{ matrix.paths }}
-          CURRENT_FILE_NAME=${CURRENT_FILE%%.*}
-          echo "Converting...: ${{ matrix.paths }}"
+          CURRENT_FILE_NAME=`echo "$CURRENT_FILE" | cut -d'.' -f1`
+          echo "Converting...: ${{ matrix.paths }} -> $CURRENT_FILE_NAME.mbtiles"
 
           tippecanoe -r1 -z12 --progress-interval=20 --drop-densest-as-needed --extend-zooms-if-still-dropping  -o $CURRENT_FILE_NAME.mbtiles ${{ matrix.paths }} --force
      
@@ -121,11 +121,11 @@ jobs:
         id: thermal_map
         run: |
           CURRENT_FILE=${{ matrix.paths }}
-          CURRENT_FILE_NAME=${CURRENT_FILE%%.*}
+          CURRENT_FILE_NAME=`echo "$CURRENT_FILE" | cut -d'.' -f1`
           cd ./thermal_map
           python -VV
           pip install -r requirements_main.txt
-          python main_geojson2brokjson.py ../thermalmap-geojson-data/$CURRENT_FILE_NAME.geojson ../thermalmap-geojson-data/$CURRENT_FILE_NAME.brokjson
+          python main_geojson2brokjson.py ../thermalmap-geojson-data/${CURRENT_FILE_NAME}.geojson ../thermalmap-geojson-data/$CURRENT_FILE_NAME.brokjson
           zip ../thermalmap-geojson-data/$CURRENT_FILE_NAME.brokjson.zip ../thermalmap-geojson-data/$CURRENT_FILE_NAME.brokjson
           cd ../thermalmap-geojson-data
           echo "CURRENT_FILE_NAME=$CURRENT_FILE_NAME" >> $GITHUB_OUTPUT
