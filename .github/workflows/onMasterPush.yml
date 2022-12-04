@@ -152,7 +152,7 @@ jobs:
 
 
   push-event-to-other-repo:
-    needs: [build_mbtiles, build_brokjson]
+    needs: [build_mbtiles]
     name: Dispatch to other repo= thermalmap-tilehut-server
     if: false
     runs-on: ubuntu-latest
