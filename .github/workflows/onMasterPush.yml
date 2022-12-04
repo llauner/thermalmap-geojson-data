@@ -86,7 +86,6 @@ jobs:
         with:
           commit_message: Automated Change
           skip_dirty_check: true
-          push_options: '--force'
           file_pattern: '*.mbtiles'
 
   build_brokjson:
@@ -147,7 +146,6 @@ jobs:
           repository: ./thermalmap-geojson-data
           commit_message: Automated Change
           skip_dirty_check: true
-          push_options: '--force'
           file_pattern: '${{ steps.thermal_map.outputs.CURRENT_FILE_NAME }}.brokjson.zip'
 
 
