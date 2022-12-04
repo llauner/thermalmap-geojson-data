@@ -10,29 +10,22 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
 
-  list-files:
-      runs-on: ubuntu-latest
-      outputs:
-        paths: ${{ steps.list-files.outputs.paths }}
-      steps:
-        - name: List Files
-          id: list-files
-          uses: mirko-felice/list-files-action@v3.0.1
-          with:
-            repo: ${{ github.repository }}
-            ref: ${{ github.ref }}
-            path: "."
-            ext: ".geojson"
 
   # This workflow contains a single job called "build"
   build_mbtiles:
-    needs: list-files
     if: ${{ github.ref == 'refs/heads/master' }}
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - name: Output results
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Clone this repo=thermalmap-geojson-data + thermalmap-tippecanoe repo 
+        uses: actions/checkout@v3
+      
+      - name: list
         run: |
-          echo ${{ fromJson(needs.list-files.outputs.paths) }}
+          for fileName in $(ls); do
+            echo $fileName
+          done

@@ -14,37 +14,14 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-
-  list-files:
-      runs-on: ubuntu-latest
-      outputs:
-        paths: ${{ steps.list-files.outputs.paths }}
-      steps:
-        - name: List Files
-          id: list-files
-          uses: mirko-felice/list-files-action@v3.0.1
-          with:
-            repo: ${{ github.repository }}
-            ref: ${{ github.ref }}
-            path: "."
-            ext: ".geojson"
-
   # This workflow contains a single job called "build"
   build_mbtiles:
-    needs: list-files
-    strategy:
-      matrix:
-        paths: ${{ fromJson(needs.list-files.outputs.paths) }}
-
     if: ${{ github.ref == 'refs/heads/master' }}
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - name: Output results
-        run: |
-          echo ${{ matrix.paths }}
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Clone this repo=thermalmap-geojson-data + thermalmap-tippecanoe repo 
@@ -71,12 +48,14 @@ jobs:
       # Runs tippecannoe
       - name: Run tippecanoe to generate tiles
         run: |
-          CURRENT_FILE=${{ matrix.paths }}
-          CURRENT_FILE_NAME=$(basename -- "$CURRENT_FILE")
-          CURRENT_FILE_NAME="${CURRENT_FILE_NAME%.*}"
-          echo "Converting...: ${{ matrix.paths }} -> $CURRENT_FILE_NAME.mbtiles"
+          for fileName in $(ls *.geojson); do
+            CURRENT_FILE=$fileName
+            CURRENT_FILE_NAME=$(basename -- "$CURRENT_FILE")
+            CURRENT_FILE_NAME="${CURRENT_FILE_NAME%.*}"
+            echo "Converting...: ${{ matrix.paths }} -> $CURRENT_FILE_NAME.mbtiles"
 
-          tippecanoe -r1 -z12 --progress-interval=20 --drop-densest-as-needed --extend-zooms-if-still-dropping  -o $CURRENT_FILE_NAME.mbtiles ${{ matrix.paths }} --force
+            tippecanoe -r1 -z12 --progress-interval=20 --drop-densest-as-needed --extend-zooms-if-still-dropping  -o $CURRENT_FILE_NAME.mbtiles ${{ matrix.paths }} --force
+          done
      
       # Push changes to repo
       - name: git pull
@@ -89,10 +68,7 @@ jobs:
           file_pattern: '*.mbtiles'
 
   build_brokjson:
-    needs: [list-files]
-    strategy:
-      matrix:
-        paths: ${{ fromJson(needs.list-files.outputs.paths) }}
+    needs: [build_mbtiles]
 
     name: Build brokjson file from geojson
     if: ${{ github.ref == 'refs/heads/master' }}
@@ -124,16 +100,17 @@ jobs:
       - name: Install thermal_map and create thermals.brokjson.zip
         id: thermal_map
         run: |
-          CURRENT_FILE=${{ matrix.paths }}
-          CURRENT_FILE_NAME=$(basename -- "$CURRENT_FILE")
-          CURRENT_FILE_NAME="${CURRENT_FILE_NAME%.*}"
-          cd ./thermal_map
-          python -VV
-          pip install -r requirements_main.txt
-          python main_geojson2brokjson.py ../thermalmap-geojson-data/${CURRENT_FILE_NAME}.geojson ../thermalmap-geojson-data/$CURRENT_FILE_NAME.brokjson
-          zip ../thermalmap-geojson-data/$CURRENT_FILE_NAME.brokjson.zip ../thermalmap-geojson-data/$CURRENT_FILE_NAME.brokjson
-          cd ../thermalmap-geojson-data
-          echo "CURRENT_FILE_NAME=$CURRENT_FILE_NAME" >> $GITHUB_OUTPUT
+          for fileName in $(ls *.geojson); do
+            CURRENT_FILE=$fileName
+            CURRENT_FILE_NAME=$(basename -- "$CURRENT_FILE")
+            CURRENT_FILE_NAME="${CURRENT_FILE_NAME%.*}"
+            cd ./thermal_map
+            python -VV
+            pip install -r requirements_main.txt
+            python main_geojson2brokjson.py ../thermalmap-geojson-data/${CURRENT_FILE_NAME}.geojson ../thermalmap-geojson-data/$CURRENT_FILE_NAME.brokjson
+            zip ../thermalmap-geojson-data/$CURRENT_FILE_NAME.brokjson.zip ../thermalmap-geojson-data/$CURRENT_FILE_NAME.brokjson
+            cd ../thermalmap-geojson-data
+          done
 
       # Push changes to repo    
       - name: git pull
@@ -146,21 +123,21 @@ jobs:
           repository: ./thermalmap-geojson-data
           commit_message: Automated Change
           skip_dirty_check: true
-          file_pattern: '${{ steps.thermal_map.outputs.CURRENT_FILE_NAME }}.brokjson.zip'
+          file_pattern: '*.brokjson.zip'
 
 
-  push-event-to-other-repo:
-    needs: [build_mbtiles]
-    name: Dispatch to other repo= thermalmap-tilehut-server
-    if: false
-    runs-on: ubuntu-latest
-    steps:
-      - name: Emit repository_dispatch
-        uses: mvasigh/dispatch-action@main
-        with:
-          # You should create a personal access token and store it in your repository
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          repo: thermalmap-tilehut-server
-          owner: llauner
-          event_type: external_push_mbtiles_created
+  # push-event-to-other-repo:
+  #   needs: [build_mbtiles]
+  #   name: Dispatch to other repo= thermalmap-tilehut-server
+  #   if: false
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Emit repository_dispatch
+  #       uses: mvasigh/dispatch-action@main
+  #       with:
+  #         # You should create a personal access token and store it in your repository
+  #         token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+  #         repo: thermalmap-tilehut-server
+  #         owner: llauner
+  #         event_type: external_push_mbtiles_created
     
