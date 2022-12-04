@@ -52,9 +52,9 @@ jobs:
             CURRENT_FILE=$fileName
             CURRENT_FILE_NAME=$(basename -- "$CURRENT_FILE")
             CURRENT_FILE_NAME="${CURRENT_FILE_NAME%.*}"
-            echo "Converting...: ${{ matrix.paths }} -> $CURRENT_FILE_NAME.mbtiles"
+            echo "Converting...: $CURRENT_FILE -> $CURRENT_FILE_NAME.mbtiles"
 
-            tippecanoe -r1 -z12 --progress-interval=20 --drop-densest-as-needed --extend-zooms-if-still-dropping  -o $CURRENT_FILE_NAME.mbtiles ${{ matrix.paths }} --force
+            tippecanoe -r1 -z12 --progress-interval=20 --drop-densest-as-needed --extend-zooms-if-still-dropping  -o $CURRENT_FILE_NAME.mbtiles $CURRENT_FILE --force
           done
      
       # Push changes to repo
@@ -107,7 +107,7 @@ jobs:
             cd ./thermal_map
             python -VV
             pip install -r requirements_main.txt
-            python main_geojson2brokjson.py ../thermalmap-geojson-data/${CURRENT_FILE_NAME}.geojson ../thermalmap-geojson-data/$CURRENT_FILE_NAME.brokjson
+            python main_geojson2brokjson.py ../thermalmap-geojson-data/$CURRENT_FILE_NAME.geojson ../thermalmap-geojson-data/$CURRENT_FILE_NAME.brokjson
             zip ../thermalmap-geojson-data/$CURRENT_FILE_NAME.brokjson.zip ../thermalmap-geojson-data/$CURRENT_FILE_NAME.brokjson
             cd ../thermalmap-geojson-data
           done
