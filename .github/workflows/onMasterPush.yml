@@ -72,7 +72,8 @@ jobs:
       - name: Run tippecanoe to generate tiles
         run: |
           CURRENT_FILE=${{ matrix.paths }}
-          CURRENT_FILE_NAME=`echo "$CURRENT_FILE" | cut -d'.' -f1`
+          CURRENT_FILE_NAME=$(basename -- "$CURRENT_FILE")
+          CURRENT_FILE_NAME="${CURRENT_FILE_NAME%.*}"
           echo "Converting...: ${{ matrix.paths }} -> $CURRENT_FILE_NAME.mbtiles"
 
           tippecanoe -r1 -z12 --progress-interval=20 --drop-densest-as-needed --extend-zooms-if-still-dropping  -o $CURRENT_FILE_NAME.mbtiles ${{ matrix.paths }} --force
@@ -121,7 +122,8 @@ jobs:
         id: thermal_map
         run: |
           CURRENT_FILE=${{ matrix.paths }}
-          CURRENT_FILE_NAME=`echo "$CURRENT_FILE" | cut -d'.' -f1`
+          CURRENT_FILE_NAME=$(basename -- "$CURRENT_FILE")
+          CURRENT_FILE_NAME="${CURRENT_FILE_NAME%.*}"
           cd ./thermal_map
           python -VV
           pip install -r requirements_main.txt
