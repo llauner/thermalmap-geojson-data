@@ -151,18 +151,18 @@ jobs:
           file_pattern: '${{ steps.thermal_map.outputs.CURRENT_FILE_NAME }}.brokjson.zip'
 
 
-  # push-event-to-other-repo:
-  #   needs: [build_mbtiles, build_brokjson]
-  #   name: Dispatch to other repo= thermalmap-tilehut-server
-  #   if: false
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Emit repository_dispatch
-  #       uses: mvasigh/dispatch-action@main
-  #       with:
-  #         # You should create a personal access token and store it in your repository
-  #         token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-  #         repo: thermalmap-tilehut-server
-  #         owner: llauner
-  #         event_type: external_push_mbtiles_created
+  push-event-to-other-repo:
+    needs: [build_mbtiles, build_brokjson]
+    name: Dispatch to other repo= thermalmap-tilehut-server
+    if: false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Emit repository_dispatch
+        uses: mvasigh/dispatch-action@main
+        with:
+          # You should create a personal access token and store it in your repository
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          repo: thermalmap-tilehut-server
+          owner: llauner
+          event_type: external_push_mbtiles_created
     
